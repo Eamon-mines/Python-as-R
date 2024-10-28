@@ -1,6 +1,7 @@
 import model as m
-import numpy as np
+#import numpy as np
 import csv
+import pandas as pd
 
 x = []
 y = []
@@ -16,6 +17,13 @@ with open("test.csv", "r") as file:
         xrow.append(float(line[1]))
         xrow.append(float(line[2]))
         x.append(xrow)
+
+df = pd.read_csv("test.csv")
+
+ys = df.pMean
+print(ys)
+xs = df[["elevation", "lon", "lat"]]
+print(xs)
 
 mod = m.lm_model()
 
