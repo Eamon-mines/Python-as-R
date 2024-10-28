@@ -65,6 +65,16 @@ class TestLMModel(unittest.TestCase):
         
         self.maxDiff = None
         np.testing.assert_almost_equal(resids, mod.residuals, 7)
+    
+    def test_rsquared_and_adjust(self):
+        ys, xs, mod = assign_model()
+        mod.set_from_pandas(ys, xs)
+        mod.calculate_betas()
+        mod.calculate_residuals()
+        mod.assign_variables()
+        self.assertAlmostEqual(.5481, mod.rsquared, 4)
+        self.assertAlmostEqual(.543, mod.adjustedrsquared, 3)
+
 
 
 if __name__ == '__main__':

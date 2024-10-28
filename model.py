@@ -118,7 +118,7 @@ class lm_model:
     def t_value(self):
         t_vals = []
         for i in range(len(self.betaHat)):
-            t_vals.append([self.betaHat[i][0]/self.std_err[i]])
+            t_vals.append([self.betaHat[i]/self.std_err[i]])
         self.tvalue = np.array(t_vals)
         
 
@@ -141,10 +141,8 @@ class lm_model:
 
     def calc_adjustRSquared(self):
         n = self.yArray.shape[0]
-        k = self.betaHat.shape[0]
-        sse = np.sum(self.residuals**2)
-        SumSquaredy = np.sum((np.subtract(self.yArray, np.mean(self.yArray)))**2)
-        self.adjustedrsquared = 1 - (sse / SumSquaredy) * (n - 1) / ( n - (k + 1))
+        p = self.betaHat.shape[0] - 1
+        self.adjustedrsquared = 1 - ((1 - self.rsquared) * (n - 1) / ( n - p - 1))
 
     def calc_FStat(self):
         n = self.yArray.shape[0]
