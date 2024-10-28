@@ -1,0 +1,27 @@
+---
+title: "Untitled"
+author: "Eamon"
+date: "2024-10-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+
+```{r}
+data <- read.csv("C:/Users/drago/OneDrive/Documents/Mines_Based_Work/MINES_STUFF/Personal_Projects/PythonAsR/data.csv", header = TRUE, sep = ",")
+
+head(data)
+mod <- lm(data$pMean ~ data$elevation + data$lon + data$lat)
+```
+
+
+```{r}
+summary(mod)
+
+```
