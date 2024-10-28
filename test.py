@@ -1,8 +1,14 @@
 import model as m
 import csv
+import numpy as np
 import pandas as pd
 import unittest
-
+def assign_model():
+        df = pd.read_csv("data.csv")
+        ys = df.pMean
+        xs = df[["elevation", "lon", "lat"]]
+        mod = m.lm_model()
+        return (ys, xs, mod)
 
 class TestLMModel(unittest.TestCase):
     def test_assign_x_y(self):
@@ -11,7 +17,7 @@ class TestLMModel(unittest.TestCase):
         '''
         x = []
         y = []
-        with open("test.csv", "r") as file:
+        with open("data.csv", "r") as file:
             read = csv.reader(file)
             for line in read:
                 if line[0] == 'pMean':
@@ -26,17 +32,39 @@ class TestLMModel(unittest.TestCase):
         mod = m.lm_model()
         mod.set_from_list(y, x)
 
-        mod2 = m.lm_model()
-        df = pd.read_csv("test.csv")
-        ys = df.pMean
-        xs = df[["elevation", "lon", "lat"]]
+        ys, xs, mod2 = assign_model()
         mod2.set_from_pandas(ys, xs)
         for i in range(len(x)):
             self.assertCountEqual(mod.xArray[i],mod2.xArray[i], "Xs are same for inputs")
         self.assertCountEqual(mod.yArray,mod2.yArray, "Ys are same for inputs")
     
     def test_betas_against_true(self):
+        ys, xs, mod = assign_model()
 
+        mod.set_from_pandas(ys, xs)
+        mod.calculate_betas()
+
+        # NOTE: all numbers are pulled directly from R for the data.
+        self.assertAlmostEqual(85.42509, mod.betaHat[0], 5, "Test intercept from known data")  # test that intercept is same
+        self.assertAlmostEqual(0.0003954287, mod.betaHat[1], 10, "Test for elevation")
+        self.assertAlmostEqual(0.8725536, mod.betaHat[2], 7, "Test for longitude")
+        self.assertAlmostEqual(0.2487488, mod.betaHat[3], 7, "Test for latitude")
+
+    def test_residuals(self):
+        ys, xs, mod = assign_model()
+        mod.set_from_pandas(ys, xs)
+        mod.calculate_betas()
+        mod.calculate_residuals()
+        resids = []
+        with open("residuals.csv", "r") as file:
+            read = csv.reader(file)
+            for line in read:
+                if "x" in line:
+                    continue
+                resids.append(float(line[1]))
+        
+        self.maxDiff = None
+        np.testing.assert_almost_equal(resids, mod.residuals, 7)
 
 
 if __name__ == '__main__':
