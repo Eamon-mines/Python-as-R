@@ -8,6 +8,10 @@ def assign_model():
         ys = df.pMean
         xs = df[["elevation", "lon", "lat"]]
         mod = m.lm_model()
+        mod.set_from_pandas(ys, xs)
+        mod.calculate_betas()
+        mod.calculate_residuals()
+        mod.assign_variables()
         return (ys, xs, mod)
 
 class TestLMModel(unittest.TestCase):
@@ -24,7 +28,6 @@ class TestLMModel(unittest.TestCase):
                     continue
                 xrow = []
                 y.append([float(line[0])])
-                #xrow.append(1)
                 xrow.append(float(line[3]))
                 xrow.append(float(line[1]))
                 xrow.append(float(line[2]))
@@ -32,17 +35,15 @@ class TestLMModel(unittest.TestCase):
         mod = m.lm_model()
         mod.set_from_list(y, x)
 
-        ys, xs, mod2 = assign_model()
-        mod2.set_from_pandas(ys, xs)
+        _, _, mod2 = assign_model()
+        
         for i in range(len(x)):
             self.assertCountEqual(mod.xArray[i],mod2.xArray[i], "Xs are same for inputs")
         self.assertCountEqual(mod.yArray,mod2.yArray, "Ys are same for inputs")
     
     def test_betas_against_true(self):
-        ys, xs, mod = assign_model()
+        _, _, mod = assign_model()
 
-        mod.set_from_pandas(ys, xs)
-        mod.calculate_betas()
 
         # NOTE: all numbers are pulled directly from R for the data.
         self.assertAlmostEqual(85.42509, mod.betaHat[0], 5, "Test intercept from known data")  # test that intercept is same
@@ -51,10 +52,8 @@ class TestLMModel(unittest.TestCase):
         self.assertAlmostEqual(0.2487488, mod.betaHat[3], 7, "Test for latitude")
 
     def test_residuals(self):
-        ys, xs, mod = assign_model()
-        mod.set_from_pandas(ys, xs)
-        mod.calculate_betas()
-        mod.calculate_residuals()
+        _, _, mod = assign_model()
+
         resids = []
         with open("residuals.csv", "r") as file:
             read = csv.reader(file)
@@ -67,11 +66,8 @@ class TestLMModel(unittest.TestCase):
         np.testing.assert_almost_equal(resids, mod.residuals, 7)
     
     def test_rsquared_and_adjust(self):
-        ys, xs, mod = assign_model()
-        mod.set_from_pandas(ys, xs)
-        mod.calculate_betas()
-        mod.calculate_residuals()
-        mod.assign_variables()
+        _, _, mod = assign_model()
+
         self.assertAlmostEqual(.5481, mod.rsquared, 4)
         self.assertAlmostEqual(.543, mod.adjustedrsquared, 3)
 
