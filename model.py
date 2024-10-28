@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.stats
+import pandas as pd
 """
 THE PURPOSE OF THIS CLASS IS TO BE GIVEN SOME MATRIX AND PRODUCE AN LM MODEL.
 IT WILL HOLD THE COEFFICIENTS, RESIDUALS, ERRORS, AND OTHER INFO FROM THE R LM FUNCTION.
@@ -22,7 +23,7 @@ class lm_model:
         self.FStat = 0
         self.FProb = 0
 
-    def make(self, y: list | np.ndarray, x: list | np.ndarray, intercept=0):
+    def set_from_list(self, y: list , x: list , intercept=0):
         ''' y = the list or array of y values that we are predicting\n
             x = the list or array of x values that we are predicting\n
             intercept = 0 DEFAULT. When 0, you want a predicted value for the intercept.\n
@@ -39,38 +40,27 @@ class lm_model:
                  
             model = mod.make(y, x)'''
 
-        if intercept != 0 and intercept != 1:
+        if intercept not in [0, 1]:
             raise ValueError("Intercept value needs to be 0 or 1")
+        
+        if intercept == 0:
+            for i in range(len(y)):
+                x[i] = [1] + x[i]
 
-        if (type(y) == list): # convert list to array
-            y = np.array(y)
 
-        if type(x) == list:  # convert list to array
-            x = np.array(x)
+        y = np.array(y)
 
-        if intercept == 1:
-            self.intercept = intercept
-            spot1 = []
-            for row in x:
-                spot1.append(row[0])
-            if spot1.count(1) == x.shape[0]:
-                x = np.delete(x, 0, 1)
+        x = np.array(x)
+
 
         if x.shape[0] != y.shape[0]:   # if wrong number of (x,y) pairs, kill prog
             raise TypeError(f"X and Y dont have the same number of rows")
         
         self.xArray = x
         self.yArray = y
-        
 
-        xTranspose = x.transpose()
-        xTx = np.matmul(xTranspose, x)
-        xTy = np.matmul(xTranspose, y)
-        self.betaHat = np.matmul(np.linalg.inv(xTx), xTy)
-
-        self.residuals = np.subtract(y, np.matmul(x, self.betaHat))
-
-        # calculate the rest
+    
+    def assign_variables(self):
         self.std_error()
         self.t_value()
         self.degrees_of_Freedom()
@@ -79,7 +69,37 @@ class lm_model:
         self.calc_adjustRSquared()
         self.calc_FStat()
         self.calc_probs()
+
+    def calculate_betas(self):
+        xTranspose = self.xArray.transpose()
+        xTx = np.matmul(xTranspose, self.xArray)
+        xTy = np.matmul(xTranspose, self.yArray)
+        self.betaHat = np.matmul(np.linalg.inv(xTx), xTy)
     
+    def calculate_residuals(self):
+        self.residuals = np.subtract(self.yArray, np.matmul(self.xArray, self.betaHat))
+
+    def set_from_pandas(self, y: pd.DataFrame, x: pd.DataFrame, intercept=0):
+        if intercept not in [0, 1]:
+            raise ValueError("Intercept value needs to be 0 or 1")
+        
+        if intercept == 0:
+            for i in range(len(y)):
+                x[i] = [1] + x[i]
+
+
+        y = np.array(y.to_numpy())
+
+        x = np.array(x.to_numpy())
+        print(x)
+
+
+        if x.shape[0] != y.shape[0]:   # if wrong number of (x,y) pairs, kill prog
+            raise TypeError(f"X and Y dont have the same number of rows")
+        
+        self.xArray = x
+        self.yArray = y
+
 
     def std_error(self):
         n= self.xArray.shape[0]
