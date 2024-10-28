@@ -84,14 +84,15 @@ class lm_model:
             raise ValueError("Intercept value needs to be 0 or 1")
         
         if intercept == 0:
+            ones = []
             for i in range(len(y)):
-                x[i] = [1] + x[i]
+                ones.append(1)
+            x.insert(0, "Intercept", ones)
 
 
         y = np.array(y.to_numpy())
 
         x = np.array(x.to_numpy())
-        print(x)
 
 
         if x.shape[0] != y.shape[0]:   # if wrong number of (x,y) pairs, kill prog
