@@ -71,6 +71,14 @@ class TestLMModel(unittest.TestCase):
         self.assertAlmostEqual(.5481, mod.rsquared, 4)
         self.assertAlmostEqual(.543, mod.adjustedrsquared, 3)
 
+    def test_rank(self):
+        _, _, mod = assign_model()
+        self.assertEqual(4, mod.rank)
+    
+    def test_resid_std_err(self):
+        _, _, mod = assign_model()
+        self.assertAlmostEqual(1.232, mod.residError, 3)
+
 
 
 if __name__ == '__main__':

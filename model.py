@@ -141,7 +141,10 @@ class lm_model:
 
     def calc_adjustRSquared(self):
         n = self.yArray.shape[0]
-        p = self.betaHat.shape[0] - 1
+        if self.intercept == 0:
+            p = self.betaHat.shape[0] - 1
+        else:
+            p = self.betaHat.shape[0]
         self.adjustedrsquared = 1 - ((1 - self.rsquared) * (n - 1) / ( n - p - 1))
 
     def calc_FStat(self):
