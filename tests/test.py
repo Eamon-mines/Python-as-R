@@ -1,10 +1,10 @@
-import model as m
+import sys, os
 import csv
 import numpy as np
 import pandas as pd
 import unittest
 def assign_model():
-        df = pd.read_csv("data.csv")
+        df = pd.read_csv("./tests/data.csv")
         ys = df.pMean
         xs = df[["elevation", "lon", "lat"]]
         mod = m.lm_model()
@@ -21,7 +21,7 @@ class TestLMModel(unittest.TestCase):
         '''
         x = []
         y = []
-        with open("data.csv", "r") as file:
+        with open("./tests/data.csv", "r") as file:
             read = csv.reader(file)
             for line in read:
                 if line[0] == 'pMean':
@@ -55,7 +55,7 @@ class TestLMModel(unittest.TestCase):
         _, _, mod = assign_model()
 
         resids = []
-        with open("residuals.csv", "r") as file:
+        with open("./tests/residuals.csv", "r") as file:
             read = csv.reader(file)
             for line in read:
                 if "x" in line:
@@ -82,4 +82,8 @@ class TestLMModel(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(current_dir)
+    sys.path.append(parent_dir)
+    import model as m
     unittest.main()
