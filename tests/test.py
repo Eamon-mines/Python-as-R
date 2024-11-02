@@ -27,7 +27,7 @@ class TestLMModel(unittest.TestCase):
                 if line[0] == 'pMean':
                     continue
                 xrow = []
-                y.append([float(line[0])])
+                y.append(float(line[0]))
                 xrow.append(float(line[3]))
                 xrow.append(float(line[1]))
                 xrow.append(float(line[2]))
@@ -38,18 +38,18 @@ class TestLMModel(unittest.TestCase):
         _, _, mod2 = assign_model()
         
         for i in range(len(x)):
-            self.assertCountEqual(mod.xArray[i],mod2.xArray[i], "Xs are same for inputs")
-        self.assertCountEqual(mod.yArray,mod2.yArray, "Ys are same for inputs")
+            np.testing.assert_array_equal(mod.xArray[i],mod2.xArray[i], "Xs are same for inputs")
+        np.testing.assert_array_equal(mod.yArray,mod2.yArray, "Ys are same for inputs")
     
     def test_betas_against_true(self):
         _, _, mod = assign_model()
 
 
         # NOTE: all numbers are pulled directly from R for the data.
-        self.assertAlmostEqual(85.42509, mod.betaHat[0], 5, "Test intercept from known data")  # test that intercept is same
-        self.assertAlmostEqual(0.0003954287, mod.betaHat[1], 10, "Test for elevation")
-        self.assertAlmostEqual(0.8725536, mod.betaHat[2], 7, "Test for longitude")
-        self.assertAlmostEqual(0.2487488, mod.betaHat[3], 7, "Test for latitude")
+        np.testing.assert_almost_equal(85.42509, mod.betaHat[0], 5, "Test intercept from known data")  # test that intercept is same
+        np.testing.assert_almost_equal(0.0003954287, mod.betaHat[1], 10, "Test for elevation")
+        np.testing.assert_almost_equal(0.8725536, mod.betaHat[2], 7, "Test for longitude")
+        np.testing.assert_almost_equal(0.2487488, mod.betaHat[3], 7, "Test for latitude")
 
     def test_residuals(self):
         _, _, mod = assign_model()
@@ -63,21 +63,21 @@ class TestLMModel(unittest.TestCase):
                 resids.append(float(line[1]))
         
         self.maxDiff = None
-        np.testing.assert_almost_equal(resids, mod.residuals, 7)
+        np.testing.assert_almost_equal(resids, mod.residuals, 7, "Residuals dont match.")
     
     def test_rsquared_and_adjust(self):
         _, _, mod = assign_model()
 
-        self.assertAlmostEqual(.5481, mod.rsquared, 4)
-        self.assertAlmostEqual(.543, mod.adjustedrsquared, 3)
+        np.testing.assert_almost_equal(.5481, mod.rsquared, 4)
+        np.testing.assert_almost_equal(.543, mod.adjustedrsquared, 3)
 
     def test_rank(self):
         _, _, mod = assign_model()
-        self.assertEqual(4, mod.rank)
+        np.testing.assert_equal(4, mod.rank)
     
     def test_resid_std_err(self):
         _, _, mod = assign_model()
-        self.assertAlmostEqual(1.232, mod.residError, 3)
+        np.testing.assert_almost_equal(1.232, mod.residError, 3)
 
 
 
